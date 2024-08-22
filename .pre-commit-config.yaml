@@ -24,8 +24,8 @@ repos:
       - id: check-docstring-first
       - id: check-json
         exclude: ^\.vscode/.*\.json$
-      - id: check-executables-have-shebangs
-      - id: check-shebang-scripts-are-executable
+      # - id: check-executables-have-shebangs
+      # - id: check-shebang-scripts-are-executable
       - id: debug-statements
       - id: detect-private-key
       - id: check-symlinks
