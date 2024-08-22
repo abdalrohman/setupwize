@@ -1,0 +1,12 @@
+version: "3.9"
+
+services:
+  { PROJECT_NAME }:
+    build:
+      context: . # Build context is the current directory
+      dockerfile: Dockerfile # Specify the Dockerfile name if it's not named 'Dockerfile'
+    volumes:
+      - .env:/project/.env # Mount anything to /project inside the container to use it inside the container
+    environment:
+      - PYTHON_BASE=3.10-slim # Set the PYTHON_BASE argument for the Dockerfile
+    command: python cli.py # Set the command to run when the container starts
