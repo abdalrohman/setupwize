@@ -1,0 +1,28 @@
+packages:
+  - name: alacritty
+    description: Fast, cross-platform, OpenGL terminal emulator
+    category: Terminal
+    tasks:
+      # install zellij requirement for alacritty
+      - type: shell
+        command: |
+          if type zellij &> /dev/null; then
+            echo "Zellij is already installed"
+          else
+            wget -q -O /tmp/zellij.tar.gz "https://github.com/zellij-org/zellij/releases/latest/download/zellij-x86_64-unknown-linux-musl.tar.gz"
+            tar xf /tmp/zellij.tar.gz -C /tmp
+            sudo install /tmp/zellij /usr/local/bin && echo "Zellij installed successfully"
+            rm /tmp/zellij.tar.gz /tmp/zellij
+          fi
+      - type: apt
+        action: install
+        packages: [alacritty]
+      - type: configuration
+        config_path:
+          - ./configurations/alacritty
+          - ./configurations/zellij
+        destination:
+          - ~/.config/alacritty
+          - ~/.config/zellij
+        verbose: true
+    dependencies: []

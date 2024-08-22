@@ -1,0 +1,181 @@
+# File Management
+
+extract() {
+  if [ -f "$1" ]; then
+    case "$1" in
+    *.tar.bz2) tar xjf "$1" ;;
+    *.tar.gz) tar xzf "$1" ;;
+    *.bz2) bunzip2 "$1" ;;
+    *.rar) unrar e "$1" ;;
+    *.gz) gunzip "$1" ;;
+    *.tar) tar xf "$1" ;;
+    *.tbz2) tar xjf "$1" ;;
+    *.tgz) tar xzf "$1" ;;
+    *.zip) unzip "$1" ;;
+    *.Z) uncompress "$1" ;;
+    *.7z) 7z x "$1" ;;
+    *) echo "'$1' cannot be extracted" ;;
+    esac
+  else
+    echo "'$1' is not a valid file"
+  fi
+}
+
+findFileSize() {
+  while true; do
+    find . -name "$1" -exec du -sh {} + | sort -n -r
+    sleep 1
+    clear
+  done
+}
+
+cpv() {
+  rsync -pogbr -hhh "$1" -e /dev/null --progress "$@"
+}
+
+copy() {
+  rsync -a --info=progress2 --info=name0 --stats -h -HAX "$@"
+}
+
+copyd() {
+  rsync -a --info=progress2 --info=name0 --stats -h -HAX "$@" --delete
+}
+
+del() {
+  mkdir -p /tmp/.trash && mv "$@" /tmp/.trash
+}
+
+buf() {
+  local filename filetime
+  filename=$1
+  filetime=$(date +%Y%m%d_%H%M%S)
+  cp -a "${filename}" "${filename}_${filetime}"
+}
+
+usage() {
+  if [ -n "$1" ]; then
+    du -h --max-depth=1 "$1"
+  else
+    du -h --max-depth=1
+  fi
+}
+
+# Search and Grep
+
+ft() {
+  grep -ir --color=always "$*" --exclude-dir="{.git,node_modules}" . | less -RX
+}
+
+ftr() {
+  rg --binary --ignore-case --color=always --glob '!.git' --glob '!node_modules' "$*" . | bat --paging=always
+}
+
+mans() {
+  man "$1" | grep -iC2 --color=always "$2" | bat
+}
+
+# System and Process Management
+
+ii() {
+  echo "You are logged on $HOST"
+  echo "Additional information: $(uname -a)"
+  echo "Users logged on: $(w -h)"
+  echo "Current date: $(date)"
+  echo "Machine stats: $(uptime)"
+  echo "Public facing IP Address: $(myip)"
+}
+
+myip() {
+  curl -s checkip.dyndns.org | grep -Eo '[0-9\.]+'
+}
+
+findPid() {
+  lsof -t -c "$@"
+}
+
+myps() {
+  ps -u "$USER" -o pid,%cpu,%mem,start,time,bsdtime,command
+}
+
+quiet() {
+  "$@" &>/dev/null &
+}
+
+fontRebuildCache() {
+  fc-cache -fv
+}
+
+hstats() {
+  local NUM=${1:-10}
+  history | awk '{print $2}' | sort | uniq -c | sort -rn | head -n "$NUM"
+}
+
+gcb() {
+  local current_branch=$(git rev-parse --abbrev-ref HEAD)
+  git checkout -b "$1"
+}
+
+# Function to list unique kernel modules for all devices
+list_unique_kernel_modules() {
+    # Find all 'modalias' files in /sys and read their contents
+    find /sys/ -name modalias -exec cat {} \; 2>/dev/null |
+
+    # For each modalias line, use modprobe to show dependencies
+    while read -r line; do
+        /sbin/modprobe --config /dev/null --show-depends "$line" 2>/dev/null
+    done |
+
+    # Extract the module name from the output, sort uniquely, and remove duplicates
+    awk -F'/' '{print $NF}' | sort -u
+}
+
+generate_figlet_text() {
+    local text=$1
+    local output_file=$2
+
+    if [ $# -ne 2 ]; then
+        echo "Usage: $0 \"Your Text\" output.txt"
+        echo "This script generates figlet text using various fonts."
+        echo ""
+        echo "Arguments:"
+        echo "* \"Your Text\": The text you want to convert into figlet art."
+        echo "* output.txt: The name of the output file where the generated figlet text will be saved."
+        echo ""
+        echo "Requirements:"
+        echo "* figlet command must be installed on your system."
+        echo "* A \"figlet-fonts\" directory must exist in the same directory as this script, containing .flf and/or .tlf font files."
+        echo ""
+        echo "Example:"
+        echo "$0 \"Hello World\" my_figlet.txt"
+        return 1
+    fi
+
+    # Check if 'figlet' command is installed
+    if ! command -v figlet &> /dev/null; then
+        echo "Error: 'figlet' command not found. Please install it first."
+        return 1
+    fi
+
+    # Check if the 'figlet-fonts' directory exists
+    FONTS_DIR="$HOME/.setupwize/figlet-fonts"
+    if [ ! -d "$FONTS_DIR" ]; then
+        echo "Error: 'figlet-fonts' directory not found in $SCRIPT_DIR"
+        return 1
+    fi
+
+    # Loop over all .flf font files
+    for fontname in "$FONTS_DIR"/*.flf; do
+        if [ -f "$fontname" ]; then
+            figlet -f "$fontname" "${text}"
+            echo "Font name: $(basename "$fontname" .flf)"
+        fi
+    done > "$output_file"
+
+    # Loop over all .tlf font files
+    for fontname in "$FONTS_DIR"/*.tlf; do
+        if [ -f "$fontname" ]; then
+            figlet -f "$fontname" "${text}"
+            echo "Font name: $(basename "$fontname" .tlf)"
+        fi
+    done >> "$output_file"
+}

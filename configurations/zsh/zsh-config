@@ -1,0 +1,169 @@
+## Options section
+setopt autocd # Automatically change directory when a directory path is entered
+setopt correct # Auto-correct typing mistakes
+setopt extendedglob # Enable extended globbing for advanced pattern matching
+setopt nocaseglob # Case-insensitive globbing
+setopt rcexpandparam # Enable array expansion with parameters
+setopt no_beep # Disable beeping
+setopt append_history # Append to history file instead of overwriting
+setopt hist_ignore_all_dups # Ignore duplicate commands in history
+setopt hist_ignore_space # Ignore commands starting with a space
+setopt inc_append_history # Immediately add commands to history
+
+# Enable extended history features
+HISTFILE=~/.zhistory
+HISTSIZE=10000
+SAVEHIST=10000
+
+# Set editing mode to vi
+bindkey -v
+
+# Case-insensitive tab completion
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
+
+# Colored completion
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
+
+# Automatically find new executables in PATH
+zstyle ':completion:*' rehash true
+
+# Speed up completions
+zstyle ':completion:*' accept-exact '*(N)'
+zstyle ':completion:*' use-cache on
+zstyle ':completion:*' cache-path ~/.zsh/cache
+
+## Keybindings section
+# Navigation
+bindkey '^[[H' beginning-of-line # Home key
+bindkey '^[[3~' delete-char # Delete key
+bindkey '^[[C' forward-char # Right arrow key
+
+# Search history
+bindkey '^R' history-incremental-search-backward # Control + R for reverse history search
+
+# Copy/Paste with mouse
+bindkey -e
+
+## Theming section
+autoload -U compinit colors zcalc
+compinit -d
+colors
+
+# Color man pages
+export LESS_TERMCAP_mb=$'\E[01;31m'
+export LESS_TERMCAP_md=$'\E[01;31m'
+export LESS_TERMCAP_me=$'\E[0m'
+export LESS_TERMCAP_se=$'\E[0m'
+export LESS_TERMCAP_so=$'\E[01;44;33m'
+export LESS_TERMCAP_ue=$'\E[0m'
+export LESS_TERMCAP_us=$'\E[01;32m'
+export LESS=-R
+
+# Load aliases
+if [[ -e $HOME/.setupwize/zsh/aliases ]]; then
+    source $HOME/.setupwize/zsh/aliases
+fi
+
+# Load functions
+if [[ -e $HOME/.setupwize/zsh/functions ]]; then
+    source $HOME/.setupwize/zsh/functions
+fi
+
+## Plugins section: Enable fish-style features
+# Syntax highlighting
+if [[ -e $HOME/.setupwize/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]]; then
+    source $HOME/.setupwize/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+fi
+
+if [[ -e $HOME/.setupwize/zsh/zsh-syntax-highlighting-catppuccin/themes/catppuccin_mocha-zsh-syntax-highlighting.zsh ]]; then
+    source $HOME/.setupwize/zsh/plugins/zsh-syntax-highlighting-catppuccin/themes/catppuccin_mocha-zsh-syntax-highlighting.zsh
+fi
+
+# History substring search
+if [[ -e $HOME/.setupwize/zsh/plugins/zsh-history-substring-search/zsh-history-substring-search.zsh ]]; then
+    source $HOME/.setupwize/zsh/plugins/zsh-history-substring-search/zsh-history-substring-search.zsh
+
+    # Bind UP and DOWN arrow keys to history substring search
+    zmodload zsh/terminfo
+    bindkey "$terminfo[kcuu1]" history-substring-search-up
+    bindkey "$terminfo[kcud1]" history-substring-search-down
+fi
+
+# Set terminal window and tab/icon title
+function title {
+  if [[ "$EMACS" == *term* ]]; then
+    return
+  fi
+
+  case "$TERM" in
+    xterm*|putty*|rxvt*|konsole*|ansi|mlterm*|alacritty|st*)
+      print -Pn "\e]2;${2:q}\a" # Set window name
+      print -Pn "\e]1;${1:q}\a" # Set tab name
+      ;;
+    screen*|tmux*)
+      print -Pn "\ek${1:q}\e\\" # Set screen hardstatus
+      ;;
+    *)
+      if [[ -n "$terminfo[fsl]" ]] && [[ -n "$terminfo[tsl]" ]]; then
+        echoti tsl
+        print -Pn "$1"
+        echoti fsl
+      fi
+      ;;
+  esac
+}
+
+ZSH_THEME_TERM_TAB_TITLE_IDLE="%15<..<%~%<<"
+ZSH_THEME_TERM_TITLE_IDLE="%~"
+
+# Runs before showing the prompt
+function mzc_termsupport_precmd {
+  [[ "${DISABLE_AUTO_TITLE:-}" == true ]] && return
+  title $ZSH_THEME_TERM_TAB_TITLE_IDLE $ZSH_THEME_TERM_TITLE_IDLE
+}
+
+# Runs before executing the command
+function mzc_termsupport_preexec {
+  [[ "${DISABLE_AUTO_TITLE:-}" == true ]] && return
+
+  emulate -L zsh
+
+  local -a cmdargs
+  cmdargs=("${(z)2}")
+
+  local CMD=${1[(wr)^(*=*|sudo|ssh|mosh|rake|-*)]:gs/%/%%}
+  local LINE="${2:gs/%/%%}"
+
+  title '$CMD' '%100>...>$LINE%<<'
+}
+
+# Add 'man' before a command
+man-command-line() {
+  [[ -z "$BUFFER" ]] && zle up-history
+  [[ "$BUFFER" = man* ]] && return
+
+  local -a args
+  args=(${${(Az)BUFFER}[1]} ${${(Az)BUFFER}[2]})
+
+  if man "${args[1]}-${args[2]}" >/dev/null 2>&1; then
+    BUFFER="man $args"
+  else
+    BUFFER="man ${args[1]}"
+  fi
+}
+zle -N man-command-line
+bindkey "\e" man-command-line
+
+# Enable command-not-found
+if [ -x /usr/lib/command-not-found ]; then
+    function command_not_found_handler {
+      /usr/lib/command-not-found -- "$1"
+      return 127
+    }
+    autoload -U +X command_not_found_handler
+    zle -N command_not_found_handler
+fi
+
+autoload -U add-zsh-hook
+add-zsh-hook precmd mzc_termsupport_precmd
+add-zsh-hook preexec mzc_termsupport_preexec

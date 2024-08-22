@@ -1,0 +1,37 @@
+() {
+    emulate -L zsh
+
+    # Source powerlevel10k theme
+    if [[ -e $HOME/.setupwize/zsh/plugins/zsh-theme-powerlevel10k/powerlevel10k.zsh-theme ]]; then
+        source $HOME/.setupwize/zsh/plugins/zsh-theme-powerlevel10k/powerlevel10k.zsh-theme
+    fi
+
+    # Source zsh-autosuggestions plugin
+    if [[ -e $HOME/.setupwize/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh ]]; then
+        source $HOME/.setupwize/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+    fi
+
+    # Determine terminal capabilities
+    if ! zmodload zsh/langinfo zsh/terminfo ||
+        [[ $langinfo[CODESET] != (utf|UTF)(-|)8 || $TERM == (dumb|linux) ]] ||
+        (( terminfo[colors] < 256 )); then
+        # Don't use powerline config if terminal doesn't support it
+        local USE_POWERLINE=false
+
+        # Define alias 'x' if parent process is 'login'
+        local parent
+        if { parent=$(</proc/$PPID/comm) } && [[ ${parent:t} == login ]]; then
+        alias x='startx ~/.xinitrc'
+        fi
+    fi
+
+    source $HOME/.setupwize/zsh/p10k.zsh
+    # Set color highlighting for autosuggestions
+    if [[ $USE_POWERLINE == false ]]; then
+        # Use 8 colors and ASCII for non-powerline terminals
+        ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=black,bold'
+    else
+        # Use 256 colors and UNICODE for powerline terminals
+        ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=244'
+    fi
+}

@@ -1,0 +1,20 @@
+packages:
+  - name: lazyvim
+    description: Install lazyvim configuration for neovim
+    category: Text Editors & IDEs
+    tasks:
+      - type: shell
+        command: |
+          if [ "$XDG_SESSION_TYPE" = "wayland" ]; then
+            sudo apt install wl-clipboard >/dev/null 2>&1
+          fi
+          if [ "$XDG_SESSION_TYPE" = "x11" ]; then
+            sudo apt install xclip >/dev/null 2>&1
+          fi
+      - type: configuration
+        config_path:
+          - ./configurations/nvim
+        destination:
+          - ~/.config/nvim
+        verbose: true
+    dependencies: [neovim, ripgrep, fd-find]

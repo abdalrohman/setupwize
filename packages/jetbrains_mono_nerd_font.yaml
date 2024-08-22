@@ -1,0 +1,69 @@
+packages:
+  - name: jetbrains_mono_nerd_font
+    description: JetBrains Mono Nerd Font
+    category: Fonts
+    tasks:
+      - type: shell
+        command: |
+          if fc-list | grep -q "JetBrainsMono Nerd Font"; then
+              echo "JetBrains Mono Nerd Font is already installed."
+          else
+              # Create fonts directory if it doesn't exist
+              mkdir -p "$HOME/.local/share/fonts"
+
+              # Download the latest JetBrains Mono Nerd Font release
+              wget -q -O /tmp/JetBrainsMono.zip https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.zip && echo "Downloaded JetBrainsMono.zip"
+
+              # Extract the downloaded zip file
+              unzip -q -o /tmp/JetBrainsMono.zip -d /tmp/JetBrainsMono && echo "Extracted JetBrainsMono.zip"
+
+              # Move the font files to the fonts directory
+              mv /tmp/JetBrainsMono/*.ttf "$HOME/.local/share/fonts" && echo "Moved fonts to $HOME/.local/share/fonts"
+
+              # Clean up temporary files
+              rm -rf /tmp/JetBrainsMono.zip /tmp/JetBrainsMono
+
+              # Update font cache
+              # discarding the output using a subshell
+              (fc-cache -fv) >/dev/null 2>&1 && echo "Updated font cache" || echo "Failed to update font cache"
+          fi
+          if command -v code &>/dev/null; then
+          # Configure VS Code settings
+          font_name="JetBrainsMono Nerd Font"
+          vscode_settings_file="$HOME/.config/Code/User/settings.json"
+
+          # Python code to update VS Code settings (with error handling)
+          python3 -c "
+          import json
+          import re
+
+          def fix_json(json_str):
+              # Remove trailing commas and fix other common JSON errors
+              json_str = re.sub(r',(\s*})', r'\1', json_str)
+              json_str = re.sub(r',(\s*])', r'\1', json_str)
+              return json_str
+
+          with open('$vscode_settings_file', 'r+') as f:
+              try:
+                  data = json.load(f)
+              except json.JSONDecodeError:
+                  f.seek(0)
+                  json_str = f.read()
+                  fixed_json_str = fix_json(json_str)
+                  f.seek(0)
+                  f.truncate()
+                  f.write(fixed_json_str)
+                  # Now try loading again
+                  f.seek(0)
+                  data = json.load(f)
+
+              # Set font for editor and terminal
+              data['editor.fontFamily'] = '$font_name'
+              data['terminal.integrated.fontFamily'] = '$font_name'
+
+              # Write the updated settings back to the file
+              f.seek(0)
+              json.dump(data, f, indent=4)
+          "
+          fi
+    dependencies: []

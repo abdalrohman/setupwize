@@ -1,0 +1,18 @@
+packages:
+  - name: mise
+    description: Installs mise, a modern, user-friendly command-line package manager for Debian and Ubuntu systems.
+    category: Package Management
+    tasks:
+      - type: shell
+        command: |
+          if [ ! -f /etc/apt/keyrings/mise-archive-keyring.gpg ]; then
+            sudo install -dm 755 /etc/apt/keyrings &&
+            wget -qO - https://mise.jdx.dev/gpg-key.pub | gpg --dearmor | sudo tee /etc/apt/keyrings/mise-archive-keyring.gpg 1>/dev/null &&
+            echo "deb [signed-by=/etc/apt/keyrings/mise-archive-keyring.gpg arch=amd64] https://mise.jdx.dev/deb stable main" | sudo tee /etc/apt/sources.list.d/mise.list
+          fi
+      - type: apt
+        action: update
+      - type: apt
+        action: install
+        packages: [mise]
+    dependencies: [curl, wget, gpg]

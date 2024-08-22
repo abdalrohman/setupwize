@@ -1,0 +1,17 @@
+packages:
+  - name: terminal_utilites
+    description: Install various useful terminal utilities
+    category: Terminal Enhancements
+    tasks:
+      - type: apt
+        action: install
+        packages:
+          - ripgrep
+          - bat
+          - eza
+          - zoxide
+          - plocate
+          - btop
+          - apache2-utils
+          - fd-find
+          - tldr

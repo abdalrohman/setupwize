@@ -1,0 +1,45 @@
+packages:
+  - name: docker
+    description: Install Docker for containerization and application deployment
+    category: Containerization
+    tasks:
+      - type: shell
+        command: |
+          if [ ! -f /etc/apt/keyrings/docker.asc ]; then
+            sudo install -m 0755 -d /etc/apt/keyrings
+            sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+            sudo chmod a+r /etc/apt/keyrings/docker.asc
+          fi
+      - type: shell
+        command: |
+          if ! grep -q 'docker' /etc/apt/sources.list /etc/apt/sources.list.d/*; then
+            echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+            $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+          fi
+      - type: apt
+        action: update
+      - type: apt
+        action: install
+        packages:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+          - docker-ce-rootless-extras
+      # Add the current user to the 'docker' group
+      - type: shell
+        command: |
+          if ! groups $USER | grep -q docker; then
+            sudo usermod -aG docker $USER
+          fi
+      # Configure Docker daemon logging
+      - type: shell
+        command: |
+          sudo mkdir -p /etc/docker
+          echo '{"log-driver":"json-file","log-opts":{"max-size":"10m","max-file":"5"}}' | sudo tee /etc/docker/daemon.json
+      - type: shell
+        command: sudo systemctl restart docker
+      - type: shell
+        command: docker --version
+    dependencies: [ca-certificates, curl]

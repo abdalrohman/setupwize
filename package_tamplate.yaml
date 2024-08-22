@@ -1,0 +1,48 @@
+# Package Definition Template for SetUpWiz
+
+packages:
+  - name: <package_name> # REQUIRED: The name of the package (should match the filename without .yaml)
+    description: <brief_description> # RECOMMENDED: A concise description of the package's purpose
+    category: <category_name> # Category for grouping packages if not set add the tool to [Unrecognized] group
+    tasks: # REQUIRED: A list of tasks to execute for installation
+      - type: <task_type> # REQUIRED: The type of task (e.g., 'apt', 'shell', 'gnome_settings', 'configuration')
+        # Task-specific configuration options:
+        # For 'apt' tasks:
+        action: <apt_action> # REQUIRED: The apt action to perform (e.g., 'update', 'install', 'add_repo')
+        repo: <repository_url> # REQUIRED only for 'add_repo' action: The repository URL to add
+        packages: # REQUIRED only for 'install' action: A list of package names to install
+          - <package_1>
+          - <package_2>
+          # ...
+        # For 'shell' tasks:
+      - type: shell
+        command:
+          | # REQUIRED: The shell command(s) to execute (use '|' for multi-line commands)
+          <command_line_1>
+          <command_line_2>
+          # ...
+      - type: gnome_settings
+        # For 'gnome_settings' tasks:
+        action: <set/get> # REQUIRED: Whether to 'set' or 'get' a Gnome setting
+        schema: <schema_name> # REQUIRED: The Gnome schema (e.g., 'org.gnome.desktop.screensaver')
+        key: <setting_key> # REQUIRED: The setting key (e.g., 'lock-enabled')
+        value: <setting_value> # REQUIRED for 'set' action: The value to set for the setting
+        # For 'configuration' tasks:
+      - type: configuration
+        config_paths: # REQUIRED: A list of paths to configuration files/directories
+          - <config_path_1>
+          - <config_path_2>
+          # ...
+        destinations: # REQUIRED: A list of corresponding destination paths
+          - <destination_path_1>
+          - <destination_path_2>
+          # ...
+        command:
+          | # OPTIONAL: Shell command(s) to execute after copying configurations
+          <command_line_1>
+          <command_line_2>
+          # ...
+    dependencies: # OPTIONAL: A list of package names that this package depends on (this will excute before copy configurations using apt-get)
+      - <dependency_1>
+      - <dependency_2>
+      # ...

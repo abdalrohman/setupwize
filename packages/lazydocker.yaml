@@ -1,0 +1,14 @@
+packages:
+  - name: lazydocker
+    description: Install Lazydocker for a terminal UI for Docker
+    category: Containerization
+    tasks:
+      - type: shell
+        command: |
+          if type lazydocker &> /dev/null; then
+            echo "Lazydocker is already installed"
+          else
+            cd /tmp && \
+            curl https://raw.githubusercontent.com/jesseduffield/lazydocker/master/scripts/install_update_linux.sh | bash && \
+            cd -
+          fi

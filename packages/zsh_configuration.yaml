@@ -1,0 +1,75 @@
+packages:
+  - name: zsh_configuration
+    description: ZSH configuration
+    category: Shell
+    tasks:
+      - type: configuration
+        command: |
+          # Create necessary directories
+          mkdir -p "$HOME/.setupwize/zsh/plugins" "$HOME/.setupwize/figlet-fonts"
+
+          # Copy configuration files
+          cp -f ./configurations/zsh/p10k.zsh "$HOME/.setupwize/zsh/"
+          cp -f ./configurations/zsh/zshrc "$HOME/.setupwize/zsh/"
+          cp -f ./configurations/zsh/zsh-config "$HOME/.setupwize/zsh/"
+          cp -f ./configurations/zsh/zsh-prompt "$HOME/.setupwize/zsh/"
+          cp -f ./configurations/zsh/aliases "$HOME/.setupwize/zsh/"
+          cp -f ./configurations/zsh/functions "$HOME/.setupwize/zsh/"
+
+          # Copy figlet fonts
+          cp -rf ./configurations/figlet-fonts/* "$HOME/.setupwize/figlet-fonts"
+
+          # Update existing plugins if they are Git repositories
+          for plugin_dir in "$HOME/.setupwize/zsh/plugins/"*; do
+            if [ -d "$plugin_dir/.git" ]; then
+              echo "Updating plugin: $plugin_dir"
+              (cd "$plugin_dir" && git pull)
+            fi
+          done
+
+          # Clone plugins if they don't exist, using shallow clones for efficiency
+          [ ! -e "$HOME/.setupwize/zsh/plugins/zsh-theme-powerlevel10k" ] && \
+              git clone --depth 1 https://github.com/romkatv/powerlevel10k.git "$HOME/.setupwize/zsh/plugins/zsh-theme-powerlevel10k"
+          [ ! -e "$HOME/.setupwize/zsh/plugins/zsh-autosuggestions" ] && \
+              git clone --depth 1 https://github.com/zsh-users/zsh-autosuggestions "$HOME/.setupwize/zsh/plugins/zsh-autosuggestions"
+          [ ! -e "$HOME/.setupwize/zsh/plugins/zsh-history-substring-search" ] && \
+              git clone --depth 1 https://github.com/zsh-users/zsh-history-substring-search "$HOME/.setupwize/zsh/plugins/zsh-history-substring-search"
+          [ ! -e "$HOME/.setupwize/zsh/plugins/zsh-syntax-highlighting" ] && \
+              git clone --depth 1 https://github.com/zsh-users/zsh-syntax-highlighting "$HOME/.setupwize/zsh/plugins/zsh-syntax-highlighting"
+          [ ! -e "$HOME/.setupwize/zsh/plugins/zsh-syntax-highlighting-catppuccin" ] && \
+              git clone --depth 1 https://github.com/catppuccin/zsh-syntax-highlighting.git "$HOME/.setupwize/zsh/plugins/zsh-syntax-highlighting-catppuccin"
+
+          # Clone fzf if it doesn't exist
+          [ ! -e "$HOME/.fzf" ] && \
+              if command -v fzf >/dev/null 2>&1 && ( [ "$(command -v fzf)" = "/usr/bin/fzf" ] || [ "$(command -v fzf)" = "/bin/fzf" ] ); then
+                  # insure not install version does not support --bash option to prevent error
+                  sudo apt remove fzf
+                  sudo apt autoremove
+              fi && \
+              git clone --depth 1 https://github.com/junegunn/fzf.git "$HOME/.fzf" && \
+              "$HOME/.fzf/install" --key-bindings --completion --no-update-rc
+
+          # install magic terminal history (atuin)
+          if type atuin >/dev/null 2>&1; then
+            echo "atuin is already installed"
+          else
+            echo "Installing atuin"
+            curl --proto '=https' --tlsv1.2 -LsSf https://setup.atuin.sh | sh >/dev/null 2>&1
+          fi
+
+          # Change default shell to Zsh
+          # Get the current user's default shell
+          current_shell=$(getent passwd "$USER" | cut -d: -f7)
+
+          # Check if the current shell is not Zsh
+          if [ "$current_shell" != "/usr/bin/zsh" ]; then
+              # Change the default shell to Zsh
+              chsh -s /usr/bin/zsh
+          fi
+
+          # Create symlink for .zshrc
+          ln -sf "$HOME/.setupwize/zsh/zshrc" "$HOME/.zshrc"
+
+        verbose: true
+
+    dependencies: [zsh, git, curl, eza, zoxide, fd-find, figlet]

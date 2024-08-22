@@ -1,0 +1,14 @@
+packages:
+  - name: fastfetch
+    description: Install fastfetch for fetching system information with a fancy ASCII logo
+    category: System Information
+    tasks:
+      - type: apt
+        action: add_repo
+        repo: ppa:zhangsongcui3371/fastfetch
+      - type: apt
+        action: update
+      - type: apt
+        action: install
+        packages:
+          - fastfetch

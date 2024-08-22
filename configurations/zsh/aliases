@@ -1,0 +1,104 @@
+# **File Management**
+
+alias cp='cp -i'
+alias mv='mv -i'
+alias rm='rm -i'
+alias df='df -h'
+alias du='du -sh'
+alias free='free -m'
+alias mkdir='mkdir -p'
+
+# **Navigation**
+
+alias cd='z'
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+alias desk='cd ~/Desktop'
+alias docs='cd ~/Documents'
+alias downloads='cd ~/Downloads'
+
+# **Listing**
+
+alias ls='eza -lh --group-directories-first --icons'
+alias lsa='ls -a'
+alias lt='eza --tree --level=2 --long --icons --git'
+alias lta='lt -a'
+
+# **fzf**
+
+alias ff="fzf --preview 'batcat --style=numbers --color=always {}'"
+alias fbr='fzf --preview "bat {}" | xargs $EDITOR'                  # Open selected file in editor
+alias fkill='ps aux | fzf | awk "{print \$2}" | xargs kill'         # Kill process interactively
+alias fh='history | fzf | awk "{print \$2}" | xargs -I {} sh -c {}' # Search and execute command from history
+
+# **fdfind (fd)**
+
+alias fd='fdfind'
+alias fdi='fd -i' # Case-insensitive search
+alias fde='fd -e' # Search by file extension
+alias fdt='fd -t' # Search by file type (f, d)
+alias fdH='fd -H' # Search hidden files and directories
+
+# **rg (ripgrep)**
+
+alias grep='grep --color=auto'
+alias rg='rg --color=always'        # Enable colored output
+alias rga='rg --files-with-matches' # List files containing matches
+alias rgc='rg --count-matches'      # Count matches in each file
+alias rgi='rg -i'                   # Case-insensitive search
+alias rgv='rg -v'                   # Invert match (show lines that don't match)
+
+# **Git**
+
+alias g='git'
+alias gcm='git commit -m'
+alias gcam='git commit -a -m'
+alias gcad='git commit -a --amend'
+alias gitu='git add . && git commit -m "$(git describe --tags --abbrev=0)" && git push'
+alias gst='git status'
+alias gl='git log --oneline --decorate --graph --all'
+alias gb='git branch'
+alias gco='git checkout'
+alias gpr='git pull --rebase'
+alias gd='git diff'
+alias gdc='git diff --cached'
+alias glo='git log --oneline --decorate'
+alias gp='git push'
+alias gpl='git pull'
+
+# **Docker**
+
+alias d='docker'
+alias dc='docker-compose'
+alias di='docker images'
+alias dps='docker ps'
+alias dpsa='docker ps -a'
+alias dexec='docker exec -it'
+alias dlogs='docker logs -f'
+alias drm='docker rm'
+alias drmi='docker rmi'
+alias dstop='docker stop'
+alias dstart='docker start'
+alias killdocker='kill -9 $(ps aux | grep docker | awk '{print $2}')'
+
+# **Tools**
+
+alias n='nvim'
+alias bat='batcat'
+alias lzg='lazygit'
+alias lzd='lazydocker'
+
+# **System**
+
+alias bt='btop'
+alias psg='ps aux | grep -v grep | grep -i'
+alias emptytrash='rm -rf ~/.local/share/Trash/*'
+
+# **Additional Useful Aliases**
+
+alias weather='curl wttr.in'
+alias cleanup='sudo apt autoremove && sudo apt autoclean'
+
+# **Python**
+alias svnv='source .venv/bin/activate'
