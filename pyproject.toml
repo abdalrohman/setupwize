@@ -3,17 +3,16 @@ name = "setupwize"
 version = "0.1"
 description = ""
 authors = [
-    { name = "M.Abdulrahman Alnaseer", email = "20760062+abdalrohman@users.noreply.github.com" },
+  { name = "M.Abdulrahman Alnaseer", email = "20760062+abdalrohman@users.noreply.github.com" },
 ]
 dependencies = [
-    "rich>=13.7.1",
-    "python-dotenv>=1.0.1",
-    "click>=8.1.7",
-    "questionary>=1.10.0",
-    "tdqm>=0.0.1",
-    "dotenv>=0.0.5",
+  "rich>=13.7.1",
+  "python-dotenv>=1.0.1",
+  "click>=8.1.7",
+  "questionary>=1.10.0",
+  "tdqm>=0.0.1",
 ]
-requires-python = ">=3.11,<=3.13"
+requires-python = ">=3.10,<=3.13"
 readme = "README.md"
 license = { text = "MIT" }
 
@@ -23,21 +22,17 @@ distribution = false
 
 [tool.pdm.dev-dependencies]
 dev = [
-    "ipython>=8.18.0",
-    "ipykernel>=6.29.5",
-    "pre-commit>=3.8.0",
-    "virtualenv>=20.26.3",
-    "setuptools>=73.0.1",
+  "ipython>=8.18.0",
+  "ipykernel>=6.29.5",
+  "pre-commit>=3.8.0",
+  "virtualenv>=20.26.3",
+  "setuptools>=73.0.1",
 ]
-codespell = [
-    "codespell>=2.3.0",
-]
-linting = [
-    "ruff>=0.6.2",
-]
+codespell = ["codespell>=2.3.0"]
+linting = ["ruff>=0.6.2"]
 typing = [
-    "mypy>=1.11.1",
-    "types-PyYAML>=6.0.12.20240808",
-    "types-decorator>=5.1.8.20240310",
-    "types-six>=1.16.21.20240513",
+  "mypy>=1.11.1",
+  "types-PyYAML>=6.0.12.20240808",
+  "types-decorator>=5.1.8.20240310",
+  "types-six>=1.16.21.20240513",
 ]
