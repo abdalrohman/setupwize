@@ -33,6 +33,8 @@ packages:
         command: |
           if ! groups $USER | grep -q docker; then
             sudo usermod -aG docker $USER
+            echo -e "\033[1;33mNOTICE: You have been added to the 'docker' group.\033[0m"
+            echo -e "\033[1;33mYou may need to log out and back in for this to take effect.\033[0m"
           fi
       # Configure Docker daemon logging
       - type: shell
@@ -42,5 +44,33 @@ packages:
       - type: shell
         command: sudo systemctl restart docker
       - type: shell
-        command: docker --version
+        command: |
+          # Try to run docker version
+          if ! docker --version &>/dev/null; then
+            echo -e "\033[1;31mWarning: Unable to run Docker commands without sudo.\033[0m"
+            echo -e "\033[1;33mThis is normal if you've just been added to the 'docker' group.\033[0m"
+            echo -e "\033[1;33mYou can either:\033[0m"
+            echo "  1. Log out and log back in to apply the group changes"
+            echo "  2. Run 'newgrp docker' in your terminal to use Docker in this session"
+            echo "  3. Use 'sudo docker' for now"
+
+            # Show version using sudo as a fallback
+            echo -e "\033[1;32mDocker version (using sudo):\033[0m"
+            sudo docker --version
+
+            # Apply the group change to the current shell session
+            echo -e "\033[1;32mApplying 'docker' group to current session...\033[0m"
+            exec sg docker -c "echo Docker group applied to current session"
+          else
+            echo -e "\033[1;32mDocker is properly installed and configured:\033[0m"
+            docker --version
+          fi
+
+          # Fix socket permissions as a fallback
+          if [ ! -w /var/run/docker.sock ] && [ -e /var/run/docker.sock ]; then
+            echo -e "\033[1;33mFixing Docker socket permissions...\033[0m"
+            sudo chmod 666 /var/run/docker.sock
+            echo -e "\033[1;32mTemporary permission fix applied to Docker socket.\033[0m"
+            echo -e "\033[1;33mNote: This is a temporary fix and will be reset after reboot.\033[0m"
+          fi
     dependencies: [ca-certificates, curl]
