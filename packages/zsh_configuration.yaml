@@ -4,20 +4,52 @@ packages:
     category: Shell
     tasks:
       - type: configuration
+        config_path:
+          - ./configurations/zsh
+          - ./configurations/figlet-fonts
+        destination:
+          - ~/.setupwize/zsh
+          - ~/.setupwize/figlet-fonts
+        verbose: true
+
+      - type: shell
         command: |
+          # Check and install required dependencies
+          for pkg in zsh git curl figlet; do
+            if ! command -v $pkg &> /dev/null; then
+              echo "Installing $pkg..."
+              if command -v apt &> /dev/null; then
+                sudo apt install -y $pkg
+              elif command -v pkcon &> /dev/null; then
+                sudo pkcon install -y $pkg
+              else
+                echo "Error: Cannot install $pkg. No supported package manager found."
+                exit 1
+              fi
+            else
+              echo "$pkg is already installed"
+            fi
+          done
+
+          # Install additional dependencies that might not be in PATH
+          for pkg in eza zoxide fd-find; do
+            if ! command -v ${pkg//-/} &> /dev/null; then
+              echo "Installing $pkg..."
+              if command -v apt &> /dev/null; then
+                sudo apt install -y $pkg
+              elif command -v pkcon &> /dev/null; then
+                sudo pkcon install -y $pkg
+              else
+                echo "Error: Cannot install $pkg. No supported package manager found."
+                exit 1
+              fi
+            else
+              echo "$pkg is already installed"
+            fi
+          done
+
           # Create necessary directories
-          mkdir -p "$HOME/.setupwize/zsh/plugins" "$HOME/.setupwize/figlet-fonts"
-
-          # Copy configuration files
-          cp -f ./configurations/zsh/p10k.zsh "$HOME/.setupwize/zsh/"
-          cp -f ./configurations/zsh/zshrc "$HOME/.setupwize/zsh/"
-          cp -f ./configurations/zsh/zsh-config "$HOME/.setupwize/zsh/"
-          cp -f ./configurations/zsh/zsh-prompt "$HOME/.setupwize/zsh/"
-          cp -f ./configurations/zsh/aliases "$HOME/.setupwize/zsh/"
-          cp -f ./configurations/zsh/functions "$HOME/.setupwize/zsh/"
-
-          # Copy figlet fonts
-          cp -rf ./configurations/figlet-fonts/* "$HOME/.setupwize/figlet-fonts"
+          mkdir -p "$HOME/.setupwize/zsh/plugins"
 
           # Update existing plugins if they are Git repositories
           for plugin_dir in "$HOME/.setupwize/zsh/plugins/"*; do
@@ -69,7 +101,6 @@ packages:
 
           # Create symlink for .zshrc
           ln -sf "$HOME/.setupwize/zsh/zshrc" "$HOME/.zshrc"
-
         verbose: true
 
-    dependencies: [zsh, git, curl, eza, zoxide, fd-find, figlet]
+    dependencies: []  # Dependencies are handled manually in the shell task

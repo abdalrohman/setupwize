@@ -1,32 +1,49 @@
 # Variables
-PYTHON_FILES := .
+PYTHON_FILES := src tests
 MYPY_CACHE := .mypy_cache
 RUFF_CACHE := .ruff_cache
 
 # Targets
-.PHONY: all format lint spell_check spell_fix clean help
+.PHONY: all format lint spell_check spell_fix clean help test coverage install
 
 all: help
 
 lint: ## Run linters
 	@echo "\033[33mLinting...\033[0m"
-	pdm run ruff check .
-	pdm run ruff format $(PYTHON_FILES) --diff
-	pdm run ruff check --select I $(PYTHON_FILES)
-	mkdir -p $(MYPY_CACHE) && pdm run mypy $(PYTHON_FILES) --cache-dir $(MYPY_CACHE)
+	@uv run ruff check .
+	uv run ruff format $(PYTHON_FILES) --diff
+	uv run ruff check --select I $(PYTHON_FILES)
+	mkdir -p $(MYPY_CACHE) && uv run mypy $(PYTHON_FILES) --cache-dir $(MYPY_CACHE)
 
 format: ## Run code formatters
 	@echo "\033[34mFormatting...\033[0m"
-	pdm run ruff format $(PYTHON_FILES)
-	pdm run ruff check --select I --fix $(PYTHON_FILES)
+	uv run ruff format $(PYTHON_FILES)
+	uv run ruff check --select I --fix $(PYTHON_FILES)
 
 spell_check: ## Run codespell on the project
 	@echo "\033[35mSpell checking...\033[0m"
-	pdm run codespell --toml pyproject.toml
+	uv run codespell --toml pyproject.toml
 
 spell_fix: ## Run codespell on the project and fix the errors
 	@echo "\033[35mSpell fixing...\033[0m"
-	pdm run codespell --toml pyproject.toml -w
+	uv run codespell --toml pyproject.toml -w
+
+test: ## Run tests
+	@echo "\033[32mRunning tests...\033[0m"
+	uv run pytest
+
+coverage: ## Run tests with coverage
+	@echo "\033[32mRunning tests with coverage...\033[0m"
+	uv run pytest --cov=setupwize --cov-report=html
+	echo "Coverage report is available in htmlcov/index.html"
+
+install: ## Install the package
+	@echo "\033[32mInstalling the package...\033[0m"
+	uv pip install -e .
+
+install-dev: ## Install the package with development dependencies
+	@echo "\033[32mInstalling the package with development dependencies...\033[0m"
+	uv pip install -e ".[dev,linting,typing,codespell]"
 
 clean: ## Clean up the project
 	@echo "\033[31mCleaning...\033[0m"
@@ -35,6 +52,8 @@ clean: ## Clean up the project
 	find . -type d -name "$(RUFF_CACHE)" -exec rm -r {} +
 	find . -type f -name "*.pyc" -delete
 	find . -type f -name "*.pyo" -delete
+	rm -rf htmlcov
+	rm -rf .coverage
 
 help: ## Show this help message
 	@echo "\033[36mAvailable targets:\033[0m"

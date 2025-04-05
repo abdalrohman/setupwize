@@ -61,7 +61,7 @@ padding = { x = 10, y = 8 }
 # Title bar, transparent background and no title bar buttons.
 # Default: "Full"
 # decorations = "Full" | "None" | "Transparent" | "Buttonless"
-decorations = "None"
+decorations = "Full"
 
 # Background opacity as a floating point number from 0.0 to 1.0. The value 0.0 is completely transparent and 1.0 is opaque.
 # Default: 1.0

@@ -42,7 +42,7 @@ packages:
           <command_line_1>
           <command_line_2>
           # ...
-    dependencies: # OPTIONAL: A list of package names that this package depends on (this will excute before copy configurations using apt-get)
+    dependencies: # OPTIONAL: A list of package names that this package depends on (this will execute before copy configurations using apt-get)
       - <dependency_1>
       - <dependency_2>
       # ...

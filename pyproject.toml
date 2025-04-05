@@ -1,11 +1,15 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [project]
 name = "setupwize"
-version = "0.1"
-description = ""
+version = "0.1.0"
+description = "Your friendly tool installation wizard"
 authors = [
-  { name = "M.Abdulrahman Alnaseer", email = "20760062+abdalrohman@users.noreply.github.com" },
+    { name = "M.Abdulrahman Alnaseer", email = "20760062+abdalrohman@users.noreply.github.com" },
 ]
-requires-python = ">=3.10,<=3.13"
+requires-python = ">=3.11"
 readme = "README.md"
 license = { text = "MIT" }
 dependencies = [
@@ -13,24 +17,116 @@ dependencies = [
     "python-dotenv>=1.0.1",
     "questionary>=2.0.1",
     "rich>=13.9.4",
-    "tdqm>=0.0.1",
+    "tqdm>=4.66.2",
+    "pyyaml>=6.0.1",
 ]
 
-[dependency-groups]
+[project.optional-dependencies]
 dev = [
     "ipykernel>=6.29.5",
     "ipython>=8.18.0",
     "pre-commit>=4.0.1",
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
 ]
-codespell = [
-    "codespell>=2.3.0",
-]
-linting = [
-    "ruff>=0.8.3",
-]
+codespell = ["codespell>=2.3.0"]
+linting = ["ruff>=0.8.3"]
 typing = [
     "mypy>=1.13.0",
     "types-decorator>=5.1.8.20240310",
     "types-pyyaml>=6.0.12.20240917",
     "types-six>=1.17.0.20241205",
+]
+
+[project.scripts]
+setupwize = "setupwize.cli.main:main"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+indent-width = 4
+exclude = [
+    ".git",
+    ".venv",
+    "env",
+    "venv",
+    "ENV",
+    "env.bak",
+    "venv.bak",
+    "__pycache__",
+    "*.pyi",
+]
+
+[tool.ruff.lint]
+select = [
+    "E",  # pycodestyle errors
+    "F",  # pyflakes
+    "B",  # flake8-bugbear
+    "C4", # flake8-comprehensions
+    "I",  # isort
+    "N",  # pep8-naming
+    "UP", # pyupgrade
+    "W",  # pycodestyle warnings
+]
+ignore = [
+    "E501", # Line too long
+    "B026", # Star-arg unpacking after keyword
+    "B904", # Use raise from
+    "E741", # Ambiguous variable name
+]
+fixable = ["ALL"]
+unfixable = []
+
+[tool.ruff.lint.isort]
+known-first-party = ["setupwize"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google" # Follow Google docstring style
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+strict_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+disallow_subclassing_any = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_functions = "test_*"
+addopts = "--strict-markers --cov=setupwize --cov-report=term-missing --cov-report=html"
+asyncio_mode = "auto"
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests requiring external services",
+]
+
+[tool.coverage.run]
+source = ["setupwize"]
+omit = ["tests/*", "examples/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "pass",
+    "raise ImportError",
+]
+
+[dependency-groups]
+dev = [
+    "mypy>=1.13.0",
+    "types-setuptools>=78.1.0.20250329",
 ]
