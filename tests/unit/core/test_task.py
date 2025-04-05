@@ -79,11 +79,13 @@ class TestAptExecutor:
             ["sudo", "pkcon", "install", "-y", "package1"],
             verbose=True,
             check=True,
+            success_code=[0, 5],
         )
         mock_run_command.assert_any_call(
             ["sudo", "pkcon", "install", "-y", "package2"],
             verbose=True,
             check=True,
+            success_code=[0, 5],
         )
 
     @patch("setupwize.core.task.run_command")
@@ -106,11 +108,13 @@ class TestAptExecutor:
             ["sudo", "apt-get", "install", "-y", "package1"],
             verbose=True,
             check=True,
+            success_code=[0, 5],
         )
         mock_run_command.assert_any_call(
             ["sudo", "apt-get", "install", "-y", "package2"],
             verbose=True,
             check=True,
+            success_code=[0, 5],
         )
 
     @patch(

@@ -85,6 +85,9 @@ def main(
         env.packages_dir = Path(packages_dir)
     if log_level:
         env.log_level = log_level
+    elif verbose:
+        # Set log level to DEBUG when verbose flag is set
+        env.log_level = "DEBUG"
     if log_path:
         env.log_path = Path(log_path)
 
@@ -146,11 +149,11 @@ def main(
         if is_running_on_kde_neon():
             # Use pkcon for KDE Neon
             logger.info("Using pkcon for KDE Neon system update...")
-            run_command(["sudo", "pkcon", "update", "-y"], verbose=True)
+            run_command(["sudo", "pkcon", "update", "-y"], verbose=verbose)
         else:
             # Use apt-get for Ubuntu
-            run_command(["sudo", "apt-get", "-y", "update"], verbose=True)
-            run_command(["sudo", "apt-get", "-y", "upgrade"], verbose=True)
+            run_command(["sudo", "apt-get", "-y", "update"], verbose=verbose)
+            run_command(["sudo", "apt-get", "-y", "upgrade"], verbose=verbose)
 
     # Install packages
     start_time = datetime.now()
@@ -161,7 +164,7 @@ def main(
     for package_name in packages_to_install_list:
         try:
             logger.info(f"Installing package: {package_name}")
-            package_obj = create_package_from_yaml(package_name, yaml_parser, verbose)
+            package_obj = create_package_from_yaml(package_name, yaml_parser, verbose=verbose)
             package_obj.install()
         except PackageNotFoundError:
             logger.exception(f"Package '{package_name}' not found.")
@@ -178,7 +181,7 @@ def main(
     # Ask for reboot if needed
     if confirm_reboot():
         logger.info("Rebooting system...")
-        run_command(["sudo", "reboot"], verbose=True)
+        run_command(["sudo", "reboot"], verbose=verbose)
 
     return 0
 

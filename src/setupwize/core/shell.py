@@ -33,7 +33,7 @@ class CommandResult:
 def run_command(
     args: list[str] | Callable[[], list[str]],
     env: dict[str, str] | None = None,
-    verbose: bool = True,
+    verbose: bool = False,
     capture_output: bool = True,
     check: bool = False,
     success_code: list[int] | None = None,
@@ -71,9 +71,9 @@ def run_command(
 
     # Log the command if verbose
     if verbose:
-        logger.info(f"Running: {shlex.join(cmd_args)}")
+        print(f"\033[1;34mVERBOSE: Running command: {shlex.join(cmd_args)}\033[0m")
         if env is not None:
-            logger.info(f"Environment: {env}")
+            print(f"\033[1;34mVERBOSE: Environment variables: {env}\033[0m")
 
     # Set up subprocess options
     if capture_output:
@@ -92,14 +92,14 @@ def run_command(
             # Read output line by line for real-time logging
             for line in iter(process.stdout.readline, ""):  # type: ignore
                 if verbose:
-                    logger.info(line.rstrip())
+                    print(f"\033[1;32mVERBOSE: Command output: {line.rstrip()}\033[0m")
                 output += line
 
             # Make sure we've read all output
             remaining_output = process.stdout.read()  # type: ignore
             if remaining_output:
                 if verbose:
-                    logger.info(remaining_output.rstrip())
+                    print(f"\033[1;32mVERBOSE: Command output: {remaining_output.rstrip()}\033[0m")
                 output += remaining_output
 
         # Wait for the process to complete
@@ -110,7 +110,9 @@ def run_command(
 
         # Log completion if verbose
         if verbose:
-            logger.info(f"Command completed in {execution_time:.2f}s with exit code {exit_code}")
+            print(
+                f"\033[1;34mVERBOSE: Command completed in {execution_time:.2f}s with exit code {exit_code}\033[0m"
+            )
 
         # Create result
         result = CommandResult(
@@ -133,7 +135,7 @@ def run_command(
     except Exception as e:
         # Log error if verbose
         if verbose:
-            logger.exception("Command failed")
+            print(f"\033[1;31mVERBOSE: Command failed: {e}\033[0m")
 
         # Calculate execution time
         execution_time = time.time() - start_time
